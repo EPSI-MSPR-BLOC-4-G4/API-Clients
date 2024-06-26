@@ -1,13 +1,20 @@
 import express from "express";
-import * as customerController from "../controllers/customer.controller";
+import {
+  createCustomer,
+  deleteCustomer,
+  getAllCustomers,
+  getCustomerById,
+  updateCustomer,
+} from "../controllers/customer.controller";
+import authMiddleware from "../middlewares/auth.middleware";
 
 const customerRouter = express.Router();
 
-customerRouter.post("/api/customers", customerController.createCustomer);
-customerRouter.get("/api/customers", customerController.getAllCustomers);
-customerRouter.get("/api/customers/:id", customerController.getCustomerById);
-customerRouter.put("/api/customers/:id", customerController.updateCustomer);
-customerRouter.delete("/api/customers/:id", customerController.deleteCustomer);
+customerRouter.post("/api/customers", createCustomer);
+customerRouter.get("/api/customers", authMiddleware, getAllCustomers);
+customerRouter.get("/api/customers/:id", authMiddleware, getCustomerById);
+customerRouter.put("/api/customers/:id", authMiddleware, updateCustomer);
+customerRouter.delete("/api/customers/:id", authMiddleware, deleteCustomer);
 
 // A IMPLEMENTER
 /*

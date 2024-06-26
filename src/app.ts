@@ -1,12 +1,13 @@
-import './../instrument.js';
+import "./../instrument.js";
 import * as Sentry from "@sentry/node";
 import express from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
-import cookieParser from 'cookie-parser';
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import customerRouter from "./routes/customer.routes";
-import { errorHandler } from "./middlewares/errorHandler"; 
+import authRouter from "./routes/auth.routes";
+import { errorHandler } from "./middlewares/errorHandler";
 
 dotenv.config();
 
@@ -29,12 +30,13 @@ app.get("/debug-sentry", function mainHandler(req, res) {
 });
 
 app.use("/", customerRouter);
+app.use("/", authRouter);
 
 app.use((req, res) => {
-  res.status(404).send({ message: 'Bad request' });
+  res.status(404).send({ message: "Bad request" });
 });
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
   });

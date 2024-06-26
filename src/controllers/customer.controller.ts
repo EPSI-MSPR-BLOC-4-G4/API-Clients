@@ -1,17 +1,29 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 // Création d'un nouveau client
-export const createCustomer = async (req: Request, res: Response) => {
+const createCustomer = async (req: Request, res: Response) => {
   try {
-    const { name, company, username, firstName, lastName, address, profile } = req.body;
+    const {
+      name,
+      company,
+      username,
+      password,
+      firstName,
+      lastName,
+      address,
+      profile,
+    } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newCustomer = await prisma.customer.create({
       data: {
         createdAt: new Date(),
         company: {
-          create: { 
+          create: {
             name: company.name,
           },
         },
@@ -19,6 +31,7 @@ export const createCustomer = async (req: Request, res: Response) => {
         username,
         firstName,
         lastName,
+        password: hashedPassword,
         address: {
           create: {
             postalCode: address.postalCode,
@@ -41,14 +54,14 @@ export const createCustomer = async (req: Request, res: Response) => {
 };
 
 // Récupération de tous les clients
-export const getAllCustomers = async (req: Request, res: Response) => {
+const getAllCustomers = async (req: Request, res: Response) => {
   try {
     const customers = await prisma.customer.findMany({
       include: {
         address: true,
         profile: true,
-        company: true
-      }
+        company: true,
+      },
     });
     res.json(customers);
   } catch (error) {
@@ -57,7 +70,7 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 };
 
 // Récupération d'un seul client
-export const getCustomerById = async (req: Request, res: Response) => {
+const getCustomerById = async (req: Request, res: Response) => {
   try {
     const customer = await prisma.customer.findUnique({
       where: { id: Number(req.params.id) },
@@ -83,7 +96,7 @@ export const getCustomerById = async (req: Request, res: Response) => {
 };
 
 // Mise à jour d'un client
-export const updateCustomer = async (req: Request, res: Response) => {
+const updateCustomer = async (req: Request, res: Response) => {
   try {
     const customer = await prisma.customer.update({
       where: { id: Number(req.params.id) },
@@ -96,15 +109,25 @@ export const updateCustomer = async (req: Request, res: Response) => {
 };
 
 // Suppression d'un client
-export const deleteCustomer = async (req: Request, res: Response) => {
+const deleteCustomer = async (req: Request, res: Response) => {
   try {
     const customer = await prisma.customer.delete({
       where: { id: Number(req.params.id) },
     });
-    res.json(`Customer ${customer.firstName} ${customer.lastName} has been successfully deleted!`);
+    res.json(
+      `Customer ${customer.firstName} ${customer.lastName} has been successfully deleted!`
+    );
   } catch (error) {
     res.status(500).json({ error: "Something went wrong" });
   }
+};
+
+export {
+  createCustomer,
+  getAllCustomers,
+  getCustomerById,
+  updateCustomer,
+  deleteCustomer,
 };
 
 /* À IMPLEMENTER 
